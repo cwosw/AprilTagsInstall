@@ -1,0 +1,4 @@
+test!
+commit V1 to github!
+HIGH PRIO: make libAprilTags.sh use the actual command it is using to search to exclude from the pidsearch
+make a "--verify services" to make sure that one of the two services didn't just die while running
