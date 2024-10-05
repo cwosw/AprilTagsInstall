@@ -83,16 +83,15 @@ if [ ! -z ${valitem+x} ]; then
                 echo "lockfile=true;servicesrunning=2;"
                 printV "Both services appear to be actively running and stable."
             elif ( [ $frontPID -ne 0 ] && [ $backPID -eq 0 ] ) || ( [ $frontPID -eq 0 ] && [ $backPID -ne 0 ] ); then
-                echo "lockfile=true;servicesrunning=1;"
+            	echo "lockfile=true;servicesrunning=1;"
                 printV "One service has stopped and the lockfile still remains. It is advised to restart the service."
             else
-                echo "lockfile=del;servicesrunning=0;"
                 rm /apps/AprilTags/servicerunning
                 if [ $? -ne 0 ]; then
-                    echo "lockfile=rmf;"
+                    echo "lockfile=rm;servicesrunning=0;"
                     printV "Lockfile found with no services running, it could not be deleted, feel free to delete it."
                 else
-                    echo "lockfile=false;"
+                    echo "lockfile=false;servicesrunning=0;"
                     printV "Lockfile found with no services running, it is now deleted."
                 fi
             fi
@@ -103,11 +102,10 @@ if [ ! -z ${valitem+x} ]; then
                 echo "lockfile=false;servicesrunning=0;"
                 printV "The AprilTags service is offline and the lockfile is not there."
             else
-                echo "lockfile=add;servicesrunning=1+;"
                 printV "The lockfile is missing and at least one of the services is running."
                 touch /apps/AprilTags/servicerunning
                 if [ $? -ne 0 ]; then
-                    echo "lockfile=tch;"
+                    echo "lockfile=add;servicesrunning=1+;"
                     printV "The lockfile couldn't be created. please make it, or stop the processes!"
                     printV "I have not made an easy way to do this yet, so go to the ApriltagsManager.sh script and run it with 'stop'"
                 elif ( [ $frontPID -ne 0 ] && [ $backPID -eq 0 ] ) || ( [ $frontPID -eq 0 ] && [ $backPID -ne 0 ] ); then
@@ -134,6 +132,7 @@ elif [ $update == "t" ]; then
     # note, below will run inside of the directory that the command is being called in
     if [ ! -f build/ws_server ] || [ ! -f app/app.py ]; then
         printV "This is not the root of the repo, exiting.."
+        printV "HINT: This can be an issue using sudo -i, meaning you need to use the script absolute path without the -i in sudo"
         exit 21
     fi
 
@@ -147,10 +146,32 @@ elif [ $update == "t" ]; then
     if [ ! -d /apps/AprilTags/Web ]; then
     	mkdir /apps/AprilTags/Web
     fi
+    if [ -d /apps/AprilTags/venv ]; then
+    	rm -rf /apps/AprilTags/venv
+    fi
 
     # note, this copy process could be done wrong, but I really don't know if it is wrong. please check if it is wrong
+    printV "copying files..."
+    
+    printV "copying backend..."
     cp -R build/* /apps/AprilTags/Backend/
+    
+    printV "copying frontend..."
     cp -R app/* /apps/AprilTags/Web/
+    
+    printV "doing the venv stuffs"
+    python -m venv /apps/AprilTags/venv
+    # removing the new venv stuff by hand
+    rm -rf /apps/AprilTags/venv/include /apps/AprilTags/venv/lib /apps/AprilTags/venv/pyvenv.cfg
+    # remove stuff from the build venv that is not wanted
+    mv /apps/AprilTags/Web/venv /apps/AprilTags/tmpvenv
+    rm -rf /apps/AprilTags/tmpvenv/bin
+    # delete the lib64 symlink
+    rm /apps/AprilTags/tmpvenv/lib64
+    # merge the two
+    cp -R /apps/AprilTags/tmpvenv/* /apps/AprilTags/venv/
+    rm -d /apps/AprilTags/tmpvenv
+    
     printV "The files were sucessfully coppied"
 
     # restart the service

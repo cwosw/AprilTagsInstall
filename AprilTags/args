@@ -1,3 +1,5 @@
 # Please be careful editing this file!
 backend="-camera_idx 0"
 fontend=""
+# manager
+autormlockfile="true"
