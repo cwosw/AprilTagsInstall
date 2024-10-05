@@ -55,7 +55,7 @@ if [[ $1 == "start" ]]; then
     # abs path BECAUSE of the proc getting commands
     /apps/AprilTags/Backend/ws_server $backend &
     
-    source Web/venv/bin/activate;
+    source /apps/AprilTags/venv/bin/activate;
     python /apps/AprilTags/Web/app.py $frontend &
     exit
 
