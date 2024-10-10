@@ -163,7 +163,7 @@ elif [ $update == "t" ]; then
     
     # remove the existing data dir if it exists then replace it
     if [ -d /apps/AprilTags/data ]; then
-    	rm -rf data
+    	rm -rf /apps/AprilTags/data
     fi
     if [ -d data ]; then
     	cp -R data/ /apps/AprilTags/data/
