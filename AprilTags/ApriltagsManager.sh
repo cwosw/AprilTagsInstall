@@ -31,7 +31,7 @@ if [[ $1 == "start" ]]; then
         # now check if it is allowed to remove the lockfile..
         if [[ $autormlockfile == "true" ]]; then
         	# check for if the services are fine
-        	status=$(AprilTags.sh -v -V lockfile)
+        	status=$(AprilTags.sh -V lockfile)
         	lockfilestatus=$(echo $status | awk -F ";" '{print $1}' | awk -F "=" '{print $2}')
         	if [[ $lockfilestatus == "false" ]]; then
         		# the lockfile is gone, and nothing is wrong
@@ -60,7 +60,7 @@ if [[ $1 == "start" ]]; then
     exit
 
 elif [[ $1 == "stop" ]]; then
-    rm servicerunning
+    rm /apps/AprilTags/servicerunning
     # and add the rest of it
     killIfRunning '/apps/AprilTags/Backend/ws_server'
     killIfRunning '/apps/AprilTags/Web/app.py'

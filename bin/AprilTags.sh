@@ -138,6 +138,8 @@ elif [ $update == "t" ]; then
 
     # disable the service to make sure stuff is ok
     systemctl stop AprilTagsPipeline.service
+    # just as a check, make sure that the lockfile is also gone
+    rm /apps/AprilTags/servicerunning
 
     # make sure that the dirs exist. why did I not do this before
     if [ ! -d /apps/AprilTags/Backend ]; then
@@ -169,7 +171,7 @@ elif [ $update == "t" ]; then
     # delete the lib64 symlink
     rm /apps/AprilTags/tmpvenv/lib64
     # merge the two
-    cp -R /apps/AprilTags/tmpvenv/* /apps/AprilTags/venv/
+    mv /apps/AprilTags/tmpvenv/* /apps/AprilTags/venv/
     rm -d /apps/AprilTags/tmpvenv
     
     printV "The files were sucessfully coppied"
