@@ -21,7 +21,7 @@ function killIfRunning() {
 }
 
 #open source for args
-source args
+source /apps/AprilTags/args
 
 if [[ $1 == "start" ]]; then
     # check for lock
@@ -31,7 +31,7 @@ if [[ $1 == "start" ]]; then
         # now check if it is allowed to remove the lockfile..
         if [[ $autormlockfile == "true" ]]; then
         	# check for if the services are fine
-        	status=$(AprilTags.sh -V lockfile)
+        	status=$(/apps/bin/AprilTags.sh -V lockfile)
         	lockfilestatus=$(echo $status | awk -F ";" '{print $1}' | awk -F "=" '{print $2}')
         	if [[ $lockfilestatus == "false" ]]; then
         		# the lockfile is gone, and nothing is wrong
