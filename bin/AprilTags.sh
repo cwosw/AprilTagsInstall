@@ -161,6 +161,14 @@ elif [ $update == "t" ]; then
     printV "copying frontend..."
     cp -R app/* /apps/AprilTags/Web/
     
+    # remove the existing data dir if it exists then replace it
+    if [ -d /apps/AprilTags/data ]; then
+    	rm -rf data
+    fi
+    if [ -d data ]; then
+    	cp -R data/ /apps/AprilTags/data/
+    fi
+    
     printV "doing the venv stuffs"
     python -m venv /apps/AprilTags/venv
     # removing the new venv stuff by hand
