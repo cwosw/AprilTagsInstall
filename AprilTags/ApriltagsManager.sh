@@ -17,6 +17,9 @@ function killIfRunning() {
     fi
 }
 
+# set clocks to max frequency (jetson only)
+jetson_clocks || true
+
 #open source for args
 source /apps/AprilTags/args
 

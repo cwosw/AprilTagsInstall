@@ -76,7 +76,7 @@ if [ ! -z ${valitem+x} ]; then
         backPID=$(libAprilTags.sh pid "/apps/AprilTags/Backend/ws_server")
         printV "BackendPID is $backPID. (zero is not running)"
         if [ -f /apps/AprilTags/servicerunning ]; then
-            # lockfile is there, are the services running
+            # lockfile is there
             printV "lockfile present, checking if backend is being run"
             if [ $frontPID -ne 0 ]; then
                 # echo "lockfile=true;running=true;"
