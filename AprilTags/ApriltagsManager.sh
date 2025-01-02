@@ -8,9 +8,6 @@ fi
 if [ ! -f '/apps/AprilTags/Backend/ws_server' ]; then
     echo "missing backend"
     exit 2
-elif [ ! -f '/apps/AprilTags/Web/app.py' ]; then
-    echo "missing webend"
-    exit 2
 fi
 
 function killIfRunning() {
@@ -55,15 +52,12 @@ if [[ $1 == "start" ]]; then
     # abs path BECAUSE of the proc getting commands
     /apps/AprilTags/Backend/ws_server $backend &
     
-    source /apps/AprilTags/venv/bin/activate;
-    python /apps/AprilTags/Web/app.py $frontend &
     exit
 
 elif [[ $1 == "stop" ]]; then
     rm /apps/AprilTags/servicerunning
     # and add the rest of it
     killIfRunning '/apps/AprilTags/Backend/ws_server'
-    killIfRunning '/apps/AprilTags/Web/app.py'
 
 else
     echo "input ${1} not understood"

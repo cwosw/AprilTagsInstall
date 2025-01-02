@@ -73,47 +73,40 @@ if [ ! -z ${valitem+x} ]; then
     printV "validating arg $valitem..."
     if [[ $valitem == "lockfile" ]]; then
         # check for the existance of the lock
-        frontPID=$(libAprilTags.sh pid "/apps/AprilTags/Web/app.py")
         backPID=$(libAprilTags.sh pid "/apps/AprilTags/Backend/ws_server")
-        printV "FrontendPID is $frontPID and the backendPID is $backPID. (zero is not running)"
+        printV "BackendPID is $backPID. (zero is not running)"
         if [ -f /apps/AprilTags/servicerunning ]; then
-            # lockfile is there, are the services running?
-            printV "lockfile present, checking if backend and frontend are being run"
-            if [ $frontPID -ne 0 ] && [ $backPID -ne 0 ]; then
-                echo "lockfile=true;servicesrunning=2;"
-                printV "Both services appear to be actively running and stable."
-            elif ( [ $frontPID -ne 0 ] && [ $backPID -eq 0 ] ) || ( [ $frontPID -eq 0 ] && [ $backPID -ne 0 ] ); then
-            	echo "lockfile=true;servicesrunning=1;"
-                printV "One service has stopped and the lockfile still remains. It is advised to restart the service."
+            # lockfile is there, are the services running
+            printV "lockfile present, checking if backend is being run"
+            if [ $frontPID -ne 0 ]; then
+                # echo "lockfile=true;running=true;"
+                printV "The service appears to be running and stable."
             else
                 rm /apps/AprilTags/servicerunning
                 if [ $? -ne 0 ]; then
-                    echo "lockfile=rm;servicesrunning=0;"
-                    printV "Lockfile found with no services running, it could not be deleted, feel free to delete it."
+                    # echo "lockfile=rm;running=false;"
+                    printV "Lockfile found with the service not running, it could not be deleted, feel free to delete it."
                 else
-                    echo "lockfile=false;servicesrunning=0;"
+                    # echo "lockfile=false;runnning=false;"
                     printV "Lockfile found with no services running, it is now deleted."
                 fi
             fi
         else
             # lockfile missing, check if anything is runing
             printV "lockfile is not there"
-            if [ $frontPID -eq 0 ] && [ $backPID -eq 0 ]; then
-                echo "lockfile=false;servicesrunning=0;"
+            if [ $frontPID -eq 0 ]; then
+                # echo "lockfile=false;running=false;"
                 printV "The AprilTags service is offline and the lockfile is not there."
             else
                 printV "The lockfile is missing and at least one of the services is running."
                 touch /apps/AprilTags/servicerunning
                 if [ $? -ne 0 ]; then
-                    echo "lockfile=add;servicesrunning=1+;"
+                    # echo "lockfile=add;running=true;"
                     printV "The lockfile couldn't be created. please make it, or stop the processes!"
-                    printV "I have not made an easy way to do this yet, so go to the ApriltagsManager.sh script and run it with 'stop'"
-                elif ( [ $frontPID -ne 0 ] && [ $backPID -eq 0 ] ) || ( [ $frontPID -eq 0 ] && [ $backPID -ne 0 ] ); then
-                    echo "lockfile=true;servicesrunning=1;"
-                    printV "Only one of the two services is running, it is advised to restart the service."
+                    printV "Go to the ApriltagsManager.sh script and run it with 'stop'"
                 else
-                    echo "lockfile=true;servicesrunning=2;"
-                    printV "Both services are online, the lockfile is now in place."
+                    # echo "lockfile=true;running=true;"
+                    printV "Service is online, the lockfile is now in place."
                 fi
             fi
         fi
@@ -122,15 +115,10 @@ if [ ! -z ${valitem+x} ]; then
         exit 11
     fi
 # update checks
-# my best recreation of the hierarchy of the processes that I need to keep track of
-# codesource
-# > build/ws_server (copy/check)
-# > build/app/app.py (copy/check)
-# > build/app/* (copy over)
 elif [ $update == "t" ]; then
     # validate that we are inside of the project root
     # note, below will run inside of the directory that the command is being called in
-    if [ ! -f build/ws_server ] || [ ! -f app/app.py ]; then
+    if [ ! -f build/ws_server ]; then
         printV "This is not the root of the repo, exiting.."
         printV "HINT: This can be an issue using sudo -i, meaning you need to use the script absolute path without the -i in sudo"
         exit 21
@@ -145,21 +133,9 @@ elif [ $update == "t" ]; then
     if [ ! -d /apps/AprilTags/Backend ]; then
     	mkdir /apps/AprilTags/Backend
     fi
-    if [ ! -d /apps/AprilTags/Web ]; then
-    	mkdir /apps/AprilTags/Web
-    fi
-    if [ -d /apps/AprilTags/venv ]; then
-    	rm -rf /apps/AprilTags/venv
-    fi
-
-    # note, this copy process could be done wrong, but I really don't know if it is wrong. please check if it is wrong
-    printV "copying files..."
     
     printV "copying backend..."
     cp -R build/* /apps/AprilTags/Backend/
-    
-    printV "copying frontend..."
-    cp -R app/* /apps/AprilTags/Web/
     
     # remove the existing data dir if it exists then replace it
     if [ -d /apps/AprilTags/data ]; then
@@ -168,19 +144,6 @@ elif [ $update == "t" ]; then
     if [ -d data ]; then
     	cp -R data/ /apps/AprilTags/data/
     fi
-    
-    printV "doing the venv stuffs"
-    python -m venv /apps/AprilTags/venv
-    # removing the new venv stuff by hand
-    rm -rf /apps/AprilTags/venv/include /apps/AprilTags/venv/lib /apps/AprilTags/venv/pyvenv.cfg
-    # remove stuff from the build venv that is not wanted
-    mv /apps/AprilTags/Web/venv /apps/AprilTags/tmpvenv
-    rm -rf /apps/AprilTags/tmpvenv/bin
-    # delete the lib64 symlink
-    rm /apps/AprilTags/tmpvenv/lib64
-    # merge the two
-    mv /apps/AprilTags/tmpvenv/* /apps/AprilTags/venv/
-    rm -d /apps/AprilTags/tmpvenv
     
     printV "The files were sucessfully coppied"
 
